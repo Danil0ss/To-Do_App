@@ -3,6 +3,7 @@ package com.example.To_Do_App.service;
 import com.example.To_Do_App.dto.TaskCreateDto;
 import com.example.To_Do_App.dto.TaskDto;
 import com.example.To_Do_App.entity.Task;
+import com.example.To_Do_App.exception.UserAccessDeniedException;
 import com.example.To_Do_App.mapper.TaskMapper;
 import com.example.To_Do_App.repository.TaskRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -39,7 +40,7 @@ public class TaskService {
     public TaskDto updateTaskStatus(Long taskId,String userId,Boolean completed){
         Task task=taskRepository.findById(taskId).
                 orElseThrow(()->new EntityNotFoundException("Task not founded"));
-        if(!task.getUserId().equals(userId)) throw new RuntimeException("Access denied");
+        if(!task.getUserId().equals(userId)) throw new UserAccessDeniedException("Access denied");
         task.setCompleted(completed);
         taskRepository.save(task);
         TaskDto taskDto=taskMapper.toDto(task);
