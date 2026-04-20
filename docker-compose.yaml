@@ -5,8 +5,8 @@ services:
     image: quay.io/keycloak/keycloak:26.0
     container_name: todo-keycloak
     environment:
-      KEYCLOAK_ADMIN: ${USER}
-      KEYCLOAK_ADMIN_PASSWORD: ${PASSWORD}
+      KEYCLOAK_ADMIN: ${KC_USER}
+      KEYCLOAK_ADMIN_PASSWORD: ${KC_PASSWORD}
     command: start-dev
     ports:
       - "8080:8080"

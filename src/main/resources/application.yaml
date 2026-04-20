@@ -22,20 +22,10 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/changelog.xml
 
-security:
-  oauth2:
-    resourceserver:
-      jwt:
-        issuer-uri: http://localhost:8080/realms/todo-realm
-        jwk-set-uri: http://localhost:8080/realms/todo-realm/protocol/openid-connect/certs
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health, info, prometheus
-  endpoint:
-    health:
-      show-details: always
-    prometheus:
-      enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/todo-realm
+          jwk-set-uri: http://localhost:8080/realms/todo-realm/protocol/openid-connect/certs
