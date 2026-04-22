@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,37 +23,35 @@ public class TaskService {
 
     public List<TaskDto> getAllTasks(String userId){
         List<Task> tasks=taskRepository.findByUserIdOrderByPositionAsc(userId);
-        List<TaskDto> taskDtos=tasks.stream().map(taskMapper::toDto).toList();
-        return taskDtos;
+        return tasks.stream().map(taskMapper::toDto).toList();
     }
 
     @Transactional
     public TaskDto createTask(TaskCreateDto createDto,String userId){
         Task createdTask=taskMapper.toEntity(createDto);
         createdTask.setUserId(userId);
-        createdTask.setPosition(1);
+        int maxPosition = taskRepository.findMaxPositionByUserId(userId).orElse(0);
+        createdTask.setPosition(maxPosition + 1);
         taskRepository.save(createdTask);
-        TaskDto taskDto =taskMapper.toDto(createdTask);
-        return taskDto;
+        return taskMapper.toDto(createdTask);
     }
 
     @Transactional
     public TaskDto updateTaskStatus(Long taskId,String userId,Boolean completed){
         Task task=taskRepository.findById(taskId).
-                orElseThrow(()->new EntityNotFoundException("Task not founded"));
+                orElseThrow(()->new EntityNotFoundException("Task not found"));
         if(!task.getUserId().equals(userId)) throw new UserAccessDeniedException("Access denied");
         task.setCompleted(completed);
         taskRepository.save(task);
-        TaskDto taskDto=taskMapper.toDto(task);
-        return taskDto;
+        return taskMapper.toDto(task);
     }
 
     @Transactional
     public void deleteTask(Long taskId,String userId){
         Task task=taskRepository.findById(taskId).
-                orElseThrow(()->new EntityNotFoundException("Task not founded"));
-        if(!task.getUserId().equals(userId)) throw new RuntimeException("Access denied");
+                orElseThrow(()->new EntityNotFoundException("Task not found"));
+        if(!task.getUserId().equals(userId)) throw new UserAccessDeniedException("Access denied");
         taskRepository.delete(task);
+        taskRepository.updateTaskPosition(userId,task.getPosition());
     }
-
 }
