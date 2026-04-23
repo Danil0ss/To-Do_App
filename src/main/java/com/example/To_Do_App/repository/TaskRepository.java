@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface TaskRepository extends JpaRepository<Task,Long> {
 
     List<Task> findByUserIdOrderByPositionAsc(String userId);
+
     @Modifying
     @Query(value = "SELECT MAX (t.position) FROM Task t WHERE t.userId=:userId")
     Optional<Integer> findMaxPositionByUserId(@Param("userId") String userId);
@@ -19,5 +20,20 @@ public interface TaskRepository extends JpaRepository<Task,Long> {
     @Modifying
     @Query(value = "UPDATE Task t SET t.position=t.position-1 "+
                     "WHERE t.userId=:userId AND t.position>:position")
-    void updateTaskPosition(@Param("userId") String userId,@Param("position") Integer position);
+    void updateTaskPosition(@Param("userId") String userId,
+                            @Param("position") Integer position);
+
+    @Modifying
+    @Query("UPDATE Task t SET t.position = t.position + 1 " +
+            "WHERE t.userId = :userId AND t.position >= :newPosition AND t.position < :oldPosition")
+    void incrementPositionsBetween(@Param("userId") String userId,
+                                   @Param("newPosition") Integer newPosition,
+                                   @Param("oldPosition") Integer oldPosition);
+
+    @Modifying
+    @Query("UPDATE Task t SET t.position = t.position - 1 " +
+            "WHERE t.userId = :userId AND t.position <= :newPosition AND t.position > :oldPosition")
+    void decrementPositionsBetween(@Param("userId") String userId,
+                                   @Param("newPosition") Integer newPosition,
+                                   @Param("oldPosition") Integer oldPosition);
 }
