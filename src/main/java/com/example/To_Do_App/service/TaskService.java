@@ -54,4 +54,19 @@ public class TaskService {
         taskRepository.delete(task);
         taskRepository.updateTaskPosition(userId,task.getPosition());
     }
+
+    public TaskDto changeTaskPosition(Long taskId,String userId,Integer newPosition){
+        Task task=taskRepository.findById(taskId).
+                orElseThrow(()-> new EntityNotFoundException("Task not found"));
+        if(!task.getUserId().equals(userId)) throw new UserAccessDeniedException("Access denied");
+        Integer oldPosition= task.getPosition();
+        if(newPosition.equals(oldPosition)) return taskMapper.toDto(task);
+        if(newPosition<oldPosition) taskRepository.incrementPositionsBetween(task.getUserId(),
+                newPosition, task.getPosition());
+        else taskRepository.decrementPositionsBetween(task.getUserId(),
+                newPosition, task.getPosition());
+        task.setPosition(newPosition);
+        taskRepository.save(task);
+        return taskMapper.toDto(task);
+    }
 }
