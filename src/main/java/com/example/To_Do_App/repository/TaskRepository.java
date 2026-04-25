@@ -13,7 +13,6 @@ public interface TaskRepository extends JpaRepository<Task,Long> {
 
     List<Task> findByUserIdOrderByPositionAsc(String userId);
 
-    @Modifying
     @Query(value = "SELECT MAX (t.position) FROM Task t WHERE t.userId=:userId")
     Optional<Integer> findMaxPositionByUserId(@Param("userId") String userId);
 

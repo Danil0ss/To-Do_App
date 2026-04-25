@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +54,7 @@ public class TaskService {
         taskRepository.updateTaskPosition(userId,task.getPosition());
     }
 
+    @Transactional
     public TaskDto changeTaskPosition(Long taskId,String userId,Integer newPosition){
         Task task=taskRepository.findById(taskId).
                 orElseThrow(()-> new EntityNotFoundException("Task not found"));

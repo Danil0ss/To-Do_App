@@ -57,4 +57,12 @@ public class TaskController {
         taskService.deleteTask(taskId, userId);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{taskId}/position")
+    public ResponseEntity<TaskDto> updateTaskPosition(@PathVariable Long taskId,
+                                                      @RequestParam Integer newPosition,
+                                                      @AuthenticationPrincipal Jwt jwt){
+        String userId= jwt.getSubject();
+        return  ResponseEntity.ok(taskService.changeTaskPosition(taskId,userId,newPosition));
+    }
 }
