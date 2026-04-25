@@ -22,37 +22,51 @@ public class TaskService {
 
     public List<TaskDto> getAllTasks(String userId){
         List<Task> tasks=taskRepository.findByUserIdOrderByPositionAsc(userId);
-        List<TaskDto> taskDtos=tasks.stream().map(taskMapper::toDto).toList();
-        return taskDtos;
+        return tasks.stream().map(taskMapper::toDto).toList();
     }
 
     @Transactional
     public TaskDto createTask(TaskCreateDto createDto,String userId){
         Task createdTask=taskMapper.toEntity(createDto);
         createdTask.setUserId(userId);
-        createdTask.setPosition(1);
+        int maxPosition = taskRepository.findMaxPositionByUserId(userId).orElse(0);
+        createdTask.setPosition(maxPosition + 1);
         taskRepository.save(createdTask);
-        TaskDto taskDto =taskMapper.toDto(createdTask);
-        return taskDto;
+        return taskMapper.toDto(createdTask);
     }
 
     @Transactional
     public TaskDto updateTaskStatus(Long taskId,String userId,Boolean completed){
         Task task=taskRepository.findById(taskId).
-                orElseThrow(()->new EntityNotFoundException("Task not founded"));
+                orElseThrow(()->new EntityNotFoundException("Task not found"));
         if(!task.getUserId().equals(userId)) throw new UserAccessDeniedException("Access denied");
         task.setCompleted(completed);
         taskRepository.save(task);
-        TaskDto taskDto=taskMapper.toDto(task);
-        return taskDto;
+        return taskMapper.toDto(task);
     }
 
     @Transactional
     public void deleteTask(Long taskId,String userId){
         Task task=taskRepository.findById(taskId).
-                orElseThrow(()->new EntityNotFoundException("Task not founded"));
-        if(!task.getUserId().equals(userId)) throw new RuntimeException("Access denied");
+                orElseThrow(()->new EntityNotFoundException("Task not found"));
+        if(!task.getUserId().equals(userId)) throw new UserAccessDeniedException("Access denied");
         taskRepository.delete(task);
+        taskRepository.updateTaskPosition(userId,task.getPosition());
     }
 
+    @Transactional
+    public TaskDto changeTaskPosition(Long taskId,String userId,Integer newPosition){
+        Task task=taskRepository.findById(taskId).
+                orElseThrow(()-> new EntityNotFoundException("Task not found"));
+        if(!task.getUserId().equals(userId)) throw new UserAccessDeniedException("Access denied");
+        Integer oldPosition= task.getPosition();
+        if(newPosition.equals(oldPosition)) return taskMapper.toDto(task);
+        if(newPosition<oldPosition) taskRepository.incrementPositionsBetween(task.getUserId(),
+                newPosition, task.getPosition());
+        else taskRepository.decrementPositionsBetween(task.getUserId(),
+                newPosition, task.getPosition());
+        task.setPosition(newPosition);
+        taskRepository.save(task);
+        return taskMapper.toDto(task);
+    }
 }
