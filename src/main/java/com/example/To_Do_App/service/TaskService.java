@@ -69,4 +69,14 @@ public class TaskService {
         taskRepository.save(task);
         return taskMapper.toDto(task);
     }
+
+    @Transactional
+    public TaskDto changeTaskDescription(Long taskId,String userId,String description){
+        Task task=taskRepository.findById(taskId).
+                orElseThrow(()-> new EntityNotFoundException("Task not found"));
+        if(!task.getUserId().equals(userId)) throw new UserAccessDeniedException("Access denied");
+        task.setDescription(description);
+        taskRepository.save(task);
+        return taskMapper.toDto(task);
+    }
 }
