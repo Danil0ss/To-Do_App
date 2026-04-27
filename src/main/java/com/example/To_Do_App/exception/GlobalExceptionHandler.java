@@ -14,16 +14,16 @@ import java.time.OffsetDateTime;
 public class GlobalExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponseDto> handleNotFound(EntityNotFoundException ex){
-        ErrorResponseDto responceDto=new ErrorResponseDto(404, ex.getMessage(),
+        ErrorResponseDto responseDto=new ErrorResponseDto(404, ex.getMessage(),
                 OffsetDateTime.now().toString());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responceDto);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseDto);
     }
 
     @ExceptionHandler(UserAccessDeniedException.class)
     public ResponseEntity<ErrorResponseDto> handleAccessDenied(UserAccessDeniedException ex){
-        ErrorResponseDto responceDto=new ErrorResponseDto(403, ex.getMessage(),
+        ErrorResponseDto responseDto=new ErrorResponseDto(403, ex.getMessage(),
                 OffsetDateTime.now().toString());
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(responceDto);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(responseDto);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

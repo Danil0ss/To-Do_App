@@ -65,4 +65,12 @@ public class TaskController {
         String userId= jwt.getSubject();
         return  ResponseEntity.ok(taskService.changeTaskPosition(taskId,userId,newPosition));
     }
+
+    @PatchMapping("/{taskId}/description")
+    public ResponseEntity<TaskDto> changeTaskDescription(@PathVariable Long taskId,
+                                                         @RequestBody String description,
+                                                         @AuthenticationPrincipal Jwt jwt){
+        String userId= jwt.getSubject();
+        return ResponseEntity.ok(taskService.changeTaskDescription(taskId,userId,description));
+    }
 }
